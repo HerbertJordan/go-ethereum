@@ -22,11 +22,11 @@ import (
 	"io"
 	"time"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie/trienode"
+	"github.com/HerbertJordan/go-ethereum/common"
+	"github.com/HerbertJordan/go-ethereum/core/types"
+	"github.com/HerbertJordan/go-ethereum/crypto"
+	"github.com/HerbertJordan/go-ethereum/rlp"
+	"github.com/HerbertJordan/go-ethereum/trie/trienode"
 	"github.com/holiman/uint256"
 )
 

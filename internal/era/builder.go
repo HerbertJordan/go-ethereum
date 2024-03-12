@@ -23,10 +23,10 @@ import (
 	"io"
 	"math/big"
 
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/internal/era/e2store"
-	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/HerbertJordan/go-ethereum/common"
+	"github.com/HerbertJordan/go-ethereum/core/types"
+	"github.com/HerbertJordan/go-ethereum/internal/era/e2store"
+	"github.com/HerbertJordan/go-ethereum/rlp"
 	"github.com/golang/snappy"
 )
 

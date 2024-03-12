@@ -17,11 +17,11 @@
 package catalyst
 
 import (
-	"github.com/ethereum/go-ethereum/beacon/engine"
-	"github.com/ethereum/go-ethereum/beacon/types"
-	"github.com/ethereum/go-ethereum/eth"
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/HerbertJordan/go-ethereum/beacon/engine"
+	"github.com/HerbertJordan/go-ethereum/beacon/types"
+	"github.com/HerbertJordan/go-ethereum/eth"
+	"github.com/HerbertJordan/go-ethereum/event"
+	"github.com/HerbertJordan/go-ethereum/log"
 )
 
 // Blsync tracks the head of the beacon chain through the beacon light client

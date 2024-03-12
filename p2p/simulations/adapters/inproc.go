@@ -24,13 +24,13 @@ import (
 	"net"
 	"sync"
 
-	"github.com/ethereum/go-ethereum/event"
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/node"
-	"github.com/ethereum/go-ethereum/p2p"
-	"github.com/ethereum/go-ethereum/p2p/enode"
-	"github.com/ethereum/go-ethereum/p2p/simulations/pipes"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/HerbertJordan/go-ethereum/event"
+	"github.com/HerbertJordan/go-ethereum/log"
+	"github.com/HerbertJordan/go-ethereum/node"
+	"github.com/HerbertJordan/go-ethereum/p2p"
+	"github.com/HerbertJordan/go-ethereum/p2p/enode"
+	"github.com/HerbertJordan/go-ethereum/p2p/simulations/pipes"
+	"github.com/HerbertJordan/go-ethereum/rpc"
 	"github.com/gorilla/websocket"
 )
 

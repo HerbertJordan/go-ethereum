@@ -21,7 +21,7 @@ import (
 	"os"
 	"runtime/trace"
 
-	"github.com/ethereum/go-ethereum/log"
+	"github.com/HerbertJordan/go-ethereum/log"
 )
 
 // StartGoTrace turns on tracing, writing to the given file.

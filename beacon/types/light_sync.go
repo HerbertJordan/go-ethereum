@@ -20,10 +20,10 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ethereum/go-ethereum/beacon/engine"
-	"github.com/ethereum/go-ethereum/beacon/merkle"
-	"github.com/ethereum/go-ethereum/beacon/params"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/HerbertJordan/go-ethereum/beacon/engine"
+	"github.com/HerbertJordan/go-ethereum/beacon/merkle"
+	"github.com/HerbertJordan/go-ethereum/beacon/params"
+	"github.com/HerbertJordan/go-ethereum/common"
 	"github.com/protolambda/zrnt/eth2/beacon/capella"
 	"github.com/protolambda/ztyp/tree"
 )

@@ -20,12 +20,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/ethereum/go-ethereum/beacon/engine"
-	"github.com/ethereum/go-ethereum/beacon/types"
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/HerbertJordan/go-ethereum/beacon/engine"
+	"github.com/HerbertJordan/go-ethereum/beacon/types"
+	"github.com/HerbertJordan/go-ethereum/common"
 
-	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/rpc"
+	"github.com/HerbertJordan/go-ethereum/log"
+	"github.com/HerbertJordan/go-ethereum/rpc"
 )
 
 func updateEngineApi(client *rpc.Client, headCh chan types.ChainHeadEvent) {

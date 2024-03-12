@@ -19,15 +19,15 @@ package blsync
 import (
 	"strings"
 
-	"github.com/ethereum/go-ethereum/beacon/light"
-	"github.com/ethereum/go-ethereum/beacon/light/api"
-	"github.com/ethereum/go-ethereum/beacon/light/request"
-	"github.com/ethereum/go-ethereum/beacon/light/sync"
-	"github.com/ethereum/go-ethereum/beacon/types"
-	"github.com/ethereum/go-ethereum/cmd/utils"
-	"github.com/ethereum/go-ethereum/common/mclock"
-	"github.com/ethereum/go-ethereum/ethdb/memorydb"
-	"github.com/ethereum/go-ethereum/event"
+	"github.com/HerbertJordan/go-ethereum/beacon/light"
+	"github.com/HerbertJordan/go-ethereum/beacon/light/api"
+	"github.com/HerbertJordan/go-ethereum/beacon/light/request"
+	"github.com/HerbertJordan/go-ethereum/beacon/light/sync"
+	"github.com/HerbertJordan/go-ethereum/beacon/types"
+	"github.com/HerbertJordan/go-ethereum/cmd/utils"
+	"github.com/HerbertJordan/go-ethereum/common/mclock"
+	"github.com/HerbertJordan/go-ethereum/ethdb/memorydb"
+	"github.com/HerbertJordan/go-ethereum/event"
 	"github.com/urfave/cli/v2"
 )
 

@@ -23,7 +23,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/ethereum/go-ethereum/common"
+	"github.com/HerbertJordan/go-ethereum/common"
 )
 
 type testchain struct {
