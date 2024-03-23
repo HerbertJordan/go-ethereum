@@ -32,20 +32,20 @@ import (
 
 type stateEnv struct {
 	db    ethdb.Database
-	state *StateDB
+	state *stateDb
 }
 
 func newStateEnv() *stateEnv {
 	db := rawdb.NewMemoryDatabase()
 	sdb, _ := New(types.EmptyRootHash, NewDatabase(db), nil)
-	return &stateEnv{db: db, state: sdb}
+	return &stateEnv{db: db, state: sdb.State.(*stateDb)}
 }
 
 func TestDump(t *testing.T) {
 	db := rawdb.NewMemoryDatabase()
 	tdb := NewDatabaseWithConfig(db, &triedb.Config{Preimages: true})
 	sdb, _ := New(types.EmptyRootHash, tdb, nil)
-	s := &stateEnv{db: db, state: sdb}
+	s := &stateEnv{db: db, state: sdb.State.(*stateDb)}
 
 	// generate a few entries
 	obj1 := s.state.getOrNewStateObject(common.BytesToAddress([]byte{0x01}))
@@ -61,7 +61,8 @@ func TestDump(t *testing.T) {
 	root, _ := s.state.Commit(0, false)
 
 	// check that DumpToCollector contains the state objects that are in trie
-	s.state, _ = New(root, tdb, nil)
+	stateDB, _ := New(root, tdb, nil)
+	s.state = stateDB.State.(*stateDb)
 	got := string(s.state.Dump(nil))
 	want := `{
     "root": "71edff0130dd2385947095001c73d9e28d862fc286fca2b922ca6f6f3cddfdd2",
@@ -102,7 +103,7 @@ func TestIterativeDump(t *testing.T) {
 	db := rawdb.NewMemoryDatabase()
 	tdb := NewDatabaseWithConfig(db, &triedb.Config{Preimages: true})
 	sdb, _ := New(types.EmptyRootHash, tdb, nil)
-	s := &stateEnv{db: db, state: sdb}
+	s := &stateEnv{db: db, state: sdb.State.(*stateDb)}
 
 	// generate a few entries
 	obj1 := s.state.getOrNewStateObject(common.BytesToAddress([]byte{0x01}))
@@ -118,7 +119,8 @@ func TestIterativeDump(t *testing.T) {
 	s.state.updateStateObject(obj1)
 	s.state.updateStateObject(obj2)
 	root, _ := s.state.Commit(0, false)
-	s.state, _ = New(root, tdb, nil)
+	sdb, _ = New(root, tdb, nil)
+	s.state = sdb.State.(*stateDb)
 
 	b := &bytes.Buffer{}
 	s.state.IterativeDump(nil, json.NewEncoder(b))
@@ -194,7 +196,8 @@ func TestSnapshotEmpty(t *testing.T) {
 }
 
 func TestSnapshot2(t *testing.T) {
-	state, _ := New(types.EmptyRootHash, NewDatabase(rawdb.NewMemoryDatabase()), nil)
+	stateDB, _ := New(types.EmptyRootHash, NewDatabase(rawdb.NewMemoryDatabase()), nil)
+	state := stateDB.State.(*stateDb)
 
 	stateobjaddr0 := common.BytesToAddress([]byte("so0"))
 	stateobjaddr1 := common.BytesToAddress([]byte("so1"))
@@ -216,7 +219,8 @@ func TestSnapshot2(t *testing.T) {
 	state.setStateObject(so0)
 
 	root, _ := state.Commit(0, false)
-	state, _ = New(root, state.db, state.snaps)
+	stateDB, _ = New(root, state.db, state.snaps)
+	state = stateDB.State.(*stateDb)
 
 	// and one with deleted == true
 	so1 := state.getStateObject(stateobjaddr1)

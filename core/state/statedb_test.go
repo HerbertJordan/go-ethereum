@@ -163,7 +163,8 @@ func TestIntermediateLeaks(t *testing.T) {
 // https://github.com/ethereum/go-ethereum/pull/15549.
 func TestCopy(t *testing.T) {
 	// Create a random state test to copy and modify "independently"
-	orig, _ := New(types.EmptyRootHash, NewDatabase(rawdb.NewMemoryDatabase()), nil)
+	origDb, _ := New(types.EmptyRootHash, NewDatabase(rawdb.NewMemoryDatabase()), nil)
+	orig := origDb.State.(*stateDb)
 
 	for i := byte(0); i < 255; i++ {
 		obj := orig.getOrNewStateObject(common.BytesToAddress([]byte{i}))
@@ -173,10 +174,10 @@ func TestCopy(t *testing.T) {
 	orig.Finalise(false)
 
 	// Copy the state
-	copy := orig.Copy()
+	copy := orig.Copy().State.(*stateDb)
 
 	// Copy the copy state
-	ccopy := copy.Copy()
+	ccopy := copy.Copy().State.(*stateDb)
 
 	// modify all in memory
 	for i := byte(0); i < 255; i++ {
@@ -194,7 +195,7 @@ func TestCopy(t *testing.T) {
 	}
 
 	// Finalise the changes on all concurrently
-	finalise := func(wg *sync.WaitGroup, db *StateDB) {
+	finalise := func(wg *sync.WaitGroup, db *stateDb) {
 		defer wg.Done()
 		db.Finalise(true)
 	}
@@ -255,7 +256,7 @@ type snapshotTest struct {
 
 type testAction struct {
 	name   string
-	fn     func(testAction, *StateDB)
+	fn     func(testAction, *stateDb)
 	args   []int64
 	noAddr bool
 }
@@ -265,28 +266,28 @@ func newTestAction(addr common.Address, r *rand.Rand) testAction {
 	actions := []testAction{
 		{
 			name: "SetBalance",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.SetBalance(addr, uint256.NewInt(uint64(a.args[0])))
 			},
 			args: make([]int64, 1),
 		},
 		{
 			name: "AddBalance",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.AddBalance(addr, uint256.NewInt(uint64(a.args[0])))
 			},
 			args: make([]int64, 1),
 		},
 		{
 			name: "SetNonce",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.SetNonce(addr, uint64(a.args[0]))
 			},
 			args: make([]int64, 1),
 		},
 		{
 			name: "SetState",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				var key, val common.Hash
 				binary.BigEndian.PutUint16(key[:], uint16(a.args[0]))
 				binary.BigEndian.PutUint16(val[:], uint16(a.args[1]))
@@ -296,7 +297,7 @@ func newTestAction(addr common.Address, r *rand.Rand) testAction {
 		},
 		{
 			name: "SetCode",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				code := make([]byte, 16)
 				binary.BigEndian.PutUint64(code, uint64(a.args[0]))
 				binary.BigEndian.PutUint64(code[8:], uint64(a.args[1]))
@@ -306,19 +307,19 @@ func newTestAction(addr common.Address, r *rand.Rand) testAction {
 		},
 		{
 			name: "CreateAccount",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.CreateAccount(addr)
 			},
 		},
 		{
 			name: "SelfDestruct",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.SelfDestruct(addr)
 			},
 		},
 		{
 			name: "AddRefund",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.AddRefund(uint64(a.args[0]))
 			},
 			args:   make([]int64, 1),
@@ -326,7 +327,7 @@ func newTestAction(addr common.Address, r *rand.Rand) testAction {
 		},
 		{
 			name: "AddLog",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				data := make([]byte, 2)
 				binary.BigEndian.PutUint16(data, uint16(a.args[0]))
 				s.AddLog(&types.Log{Address: addr, Data: data})
@@ -335,7 +336,7 @@ func newTestAction(addr common.Address, r *rand.Rand) testAction {
 		},
 		{
 			name: "AddPreimage",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				preimage := []byte{1}
 				hash := common.BytesToHash(preimage)
 				s.AddPreimage(hash, preimage)
@@ -344,13 +345,13 @@ func newTestAction(addr common.Address, r *rand.Rand) testAction {
 		},
 		{
 			name: "AddAddressToAccessList",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.AddAddressToAccessList(addr)
 			},
 		},
 		{
 			name: "AddSlotToAccessList",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.AddSlotToAccessList(addr,
 					common.Hash{byte(a.args[0])})
 			},
@@ -358,7 +359,7 @@ func newTestAction(addr common.Address, r *rand.Rand) testAction {
 		},
 		{
 			name: "SetTransientState",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				var key, val common.Hash
 				binary.BigEndian.PutUint16(key[:], uint16(a.args[0]))
 				binary.BigEndian.PutUint16(val[:], uint16(a.args[1]))
@@ -423,15 +424,16 @@ func (test *snapshotTest) String() string {
 func (test *snapshotTest) run() bool {
 	// Run all actions and create snapshots.
 	var (
-		state, _     = New(types.EmptyRootHash, NewDatabase(rawdb.NewMemoryDatabase()), nil)
+		sdb, _       = New(types.EmptyRootHash, NewDatabase(rawdb.NewMemoryDatabase()), nil)
+		state        = sdb.State.(*stateDb)
 		snapshotRevs = make([]int, len(test.snapshots))
 		sindex       = 0
-		checkstates  = make([]*StateDB, len(test.snapshots))
+		checkstates  = make([]*stateDb, len(test.snapshots))
 	)
 	for i, action := range test.actions {
 		if len(test.snapshots) > sindex && i == test.snapshots[sindex] {
 			snapshotRevs[sindex] = state.Snapshot()
-			checkstates[sindex] = state.Copy()
+			checkstates[sindex] = state.Copy().State.(*stateDb)
 			sindex++
 		}
 		action.fn(action, state)
@@ -448,7 +450,7 @@ func (test *snapshotTest) run() bool {
 	return true
 }
 
-func forEachStorage(s *StateDB, addr common.Address, cb func(key, value common.Hash) bool) error {
+func forEachStorage(s *stateDb, addr common.Address, cb func(key, value common.Hash) bool) error {
 	so := s.getStateObject(addr)
 	if so == nil {
 		return nil
@@ -486,7 +488,7 @@ func forEachStorage(s *StateDB, addr common.Address, cb func(key, value common.H
 }
 
 // checkEqual checks that methods of state and checkstate return the same values.
-func (test *snapshotTest) checkEqual(state, checkstate *StateDB) error {
+func (test *snapshotTest) checkEqual(state, checkstate *stateDb) error {
 	for _, addr := range test.addrs {
 		var err error
 		checkeq := func(op string, a, b interface{}) bool {
@@ -533,7 +535,8 @@ func TestTouchDelete(t *testing.T) {
 	s := newStateEnv()
 	s.state.getOrNewStateObject(common.Address{})
 	root, _ := s.state.Commit(0, false)
-	s.state, _ = New(root, s.state.db, s.state.snaps)
+	sdb, _ := New(root, s.state.db, s.state.snaps)
+	s.state = sdb.State.(*stateDb)
 
 	snapshot := s.state.Snapshot()
 	s.state.AddBalance(common.Address{}, new(uint256.Int))
@@ -763,13 +766,15 @@ func TestCommitCopy(t *testing.T) {
 // first, but the journal wiped the entire state object on create-revert.
 func TestDeleteCreateRevert(t *testing.T) {
 	// Create an initial state with a single contract
-	state, _ := New(types.EmptyRootHash, NewDatabase(rawdb.NewMemoryDatabase()), nil)
+	sdb, _ := New(types.EmptyRootHash, NewDatabase(rawdb.NewMemoryDatabase()), nil)
+	state := sdb.State.(*stateDb)
 
 	addr := common.BytesToAddress([]byte("so"))
 	state.SetBalance(addr, uint256.NewInt(1))
 
 	root, _ := state.Commit(0, false)
-	state, _ = New(root, state.db, state.snaps)
+	sdb, _ = New(root, state.db, state.snaps)
+	state = sdb.State.(*stateDb)
 
 	// Simulate self-destructing in one transaction, then create-reverting in another
 	state.SelfDestruct(addr)
@@ -781,7 +786,8 @@ func TestDeleteCreateRevert(t *testing.T) {
 
 	// Commit the entire state and make sure we don't crash and have the correct state
 	root, _ = state.Commit(0, true)
-	state, _ = New(root, state.db, state.snaps)
+	sdb, _ = New(root, state.db, state.snaps)
+	state = sdb.State.(*stateDb)
 
 	if state.getStateObject(addr) != nil {
 		t.Fatalf("self-destructed contract came alive")
@@ -864,7 +870,8 @@ func TestStateDBAccessList(t *testing.T) {
 
 	memDb := rawdb.NewMemoryDatabase()
 	db := NewDatabase(memDb)
-	state, _ := New(types.EmptyRootHash, db, nil)
+	sdb, _ := New(types.EmptyRootHash, db, nil)
+	state := sdb.State.(*stateDb)
 	state.accessList = newAccessList()
 
 	verifyAddrs := func(astrings ...string) {
@@ -1016,7 +1023,7 @@ func TestStateDBAccessList(t *testing.T) {
 	}
 	// Check the copy
 	// Make a copy
-	state = stateCopy1
+	state = stateCopy1.State.(*stateDb)
 	verifyAddrs("aa", "bb")
 	verifySlots("bb", "01", "02")
 	if got, exp := len(state.accessList.addresses), 2; got != exp {
@@ -1071,7 +1078,8 @@ func TestFlushOrderDataLoss(t *testing.T) {
 func TestStateDBTransientStorage(t *testing.T) {
 	memDb := rawdb.NewMemoryDatabase()
 	db := NewDatabase(memDb)
-	state, _ := New(types.EmptyRootHash, db, nil)
+	sdb, _ := New(types.EmptyRootHash, db, nil)
+	state := sdb.State.(*stateDb)
 
 	key := common.Hash{0x01}
 	value := common.Hash{0x02}
@@ -1155,8 +1163,10 @@ func TestDeleteStorage(t *testing.T) {
 	}
 	root, _ := state.Commit(0, true)
 	// Init phase done, create two states, one with snap and one without
-	fastState, _ := New(root, db, snaps)
-	slowState, _ := New(root, db, nil)
+	fastDb, _ := New(root, db, snaps)
+	fastState := fastDb.State.(*stateDb)
+	slowDb, _ := New(root, db, nil)
+	slowState := slowDb.State.(*stateDb)
 
 	obj := fastState.getOrNewStateObject(addr)
 	storageRoot := obj.data.Root

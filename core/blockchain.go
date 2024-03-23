@@ -1715,6 +1715,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, setHead bool) (int, error)
 		proctime := time.Since(start) // processing + validation
 
 		// Update the metrics touched during block processing and validation
+		/*  // TODO: consider re-enabling this through a general metrics method
 		accountReadTimer.Update(statedb.AccountReads)                   // Account reads are complete(in processing)
 		storageReadTimer.Update(statedb.StorageReads)                   // Storage reads are complete(in processing)
 		snapshotAccountReadTimer.Update(statedb.SnapshotAccountReads)   // Account reads are complete(in processing)
@@ -1727,12 +1728,15 @@ func (bc *BlockChain) insertChain(chain types.Blocks, setHead bool) (int, error)
 		trieUpdate := statedb.AccountUpdates + statedb.StorageUpdates   // The time spent on tries update
 		trieRead := statedb.SnapshotAccountReads + statedb.AccountReads // The time spent on account read
 		trieRead += statedb.SnapshotStorageReads + statedb.StorageReads // The time spent on storage read
-		blockExecutionTimer.Update(ptime - trieRead)                    // The time spent on EVM processing
-		blockValidationTimer.Update(vtime - (triehash + trieUpdate))    // The time spent on block validation
+		blockExecutionTimer.Update(ptime - trieRead)                 // The time spent on EVM processing
+		blockValidationTimer.Update(vtime - (triehash + trieUpdate)) // The time spent on block validation
+		*/
+		blockExecutionTimer.Update(ptime)  // The time spent on EVM processing
+		blockValidationTimer.Update(vtime) // The time spent on block validation
 
 		// Write the block to the chain and get the status.
 		var (
-			wstart = time.Now()
+			//wstart = time.Now()
 			status WriteStatus
 		)
 		if !setHead {
@@ -1746,6 +1750,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, setHead bool) (int, error)
 			return it.index, err
 		}
 		// Update the metrics touched during block commit
+		/*  TODO: consider reenabling those through a general metrics interface function
 		accountCommitTimer.Update(statedb.AccountCommits)   // Account commits are complete, we can mark them
 		storageCommitTimer.Update(statedb.StorageCommits)   // Storage commits are complete, we can mark them
 		snapshotCommitTimer.Update(statedb.SnapshotCommits) // Snapshot commits are complete, we can mark them
@@ -1753,6 +1758,7 @@ func (bc *BlockChain) insertChain(chain types.Blocks, setHead bool) (int, error)
 
 		blockWriteTimer.Update(time.Since(wstart) - statedb.AccountCommits - statedb.StorageCommits - statedb.SnapshotCommits - statedb.TrieDBCommits)
 		blockInsertTimer.UpdateSince(start)
+		*/
 
 		// Report the import stats before returning the various results
 		stats.processed++

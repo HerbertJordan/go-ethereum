@@ -53,7 +53,8 @@ func makeTestState(scheme string) (ethdb.Database, Database, *triedb.Database, c
 	db := rawdb.NewMemoryDatabase()
 	nodeDb := triedb.NewDatabase(db, config)
 	sdb := NewDatabaseWithNodeDB(db, nodeDb)
-	state, _ := New(types.EmptyRootHash, sdb, nil)
+	stateDB, _ := New(types.EmptyRootHash, sdb, nil)
+	state := stateDB.State.(*stateDb)
 
 	// Fill it with some arbitrary data
 	var accounts []*testAccount
@@ -123,7 +124,7 @@ func checkStateConsistency(db ethdb.Database, scheme string, root common.Hash) e
 	if err != nil {
 		return err
 	}
-	it := newNodeIterator(state)
+	it := newNodeIterator(state.State.(*stateDb))
 	for it.Next() {
 	}
 	return it.Error

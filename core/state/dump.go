@@ -113,7 +113,7 @@ func (d iterativeDump) OnRoot(root common.Hash) {
 
 // DumpToCollector iterates the state according to the given options and inserts
 // the items into a collector for aggregation or serialization.
-func (s *StateDB) DumpToCollector(c DumpCollector, conf *DumpConfig) (nextKey []byte) {
+func (s *stateDb) DumpToCollector(c DumpCollector, conf *DumpConfig) (nextKey []byte) {
 	// Sanitize the input to allow nil configs
 	if conf == nil {
 		conf = new(DumpConfig)
@@ -211,7 +211,7 @@ func (s *StateDB) DumpToCollector(c DumpCollector, conf *DumpConfig) (nextKey []
 
 // RawDump returns the state. If the processing is aborted e.g. due to options
 // reaching Max, the `Next` key is set on the returned Dump.
-func (s *StateDB) RawDump(opts *DumpConfig) Dump {
+func (s *stateDb) RawDump(opts *DumpConfig) Dump {
 	dump := &Dump{
 		Accounts: make(map[string]DumpAccount),
 	}
@@ -220,7 +220,7 @@ func (s *StateDB) RawDump(opts *DumpConfig) Dump {
 }
 
 // Dump returns a JSON string representing the entire state as a single json-object
-func (s *StateDB) Dump(opts *DumpConfig) []byte {
+func (s *stateDb) Dump(opts *DumpConfig) []byte {
 	dump := s.RawDump(opts)
 	json, err := json.MarshalIndent(dump, "", "    ")
 	if err != nil {
@@ -230,6 +230,6 @@ func (s *StateDB) Dump(opts *DumpConfig) []byte {
 }
 
 // IterativeDump dumps out accounts as json-objects, delimited by linebreaks on stdout
-func (s *StateDB) IterativeDump(opts *DumpConfig, output *json.Encoder) {
+func (s *stateDb) IterativeDump(opts *DumpConfig, output *json.Encoder) {
 	s.DumpToCollector(iterativeDump{output}, opts)
 }

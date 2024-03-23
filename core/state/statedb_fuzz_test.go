@@ -60,21 +60,21 @@ func newStateTestAction(addr common.Address, r *rand.Rand, index int) testAction
 	actions := []testAction{
 		{
 			name: "SetBalance",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.SetBalance(addr, uint256.NewInt(uint64(a.args[0])))
 			},
 			args: make([]int64, 1),
 		},
 		{
 			name: "SetNonce",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.SetNonce(addr, uint64(a.args[0]))
 			},
 			args: make([]int64, 1),
 		},
 		{
 			name: "SetState",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				var key, val common.Hash
 				binary.BigEndian.PutUint16(key[:], uint16(a.args[0]))
 				binary.BigEndian.PutUint16(val[:], uint16(a.args[1]))
@@ -84,7 +84,7 @@ func newStateTestAction(addr common.Address, r *rand.Rand, index int) testAction
 		},
 		{
 			name: "SetCode",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				code := make([]byte, 16)
 				binary.BigEndian.PutUint64(code, uint64(a.args[0]))
 				binary.BigEndian.PutUint64(code[8:], uint64(a.args[1]))
@@ -94,13 +94,13 @@ func newStateTestAction(addr common.Address, r *rand.Rand, index int) testAction
 		},
 		{
 			name: "CreateAccount",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.CreateAccount(addr)
 			},
 		},
 		{
 			name: "Selfdestruct",
-			fn: func(a testAction, s *StateDB) {
+			fn: func(a testAction, s *stateDb) {
 				s.SelfDestruct(addr)
 			},
 		},
@@ -203,10 +203,11 @@ func (test *stateTest) run() bool {
 		if i != 0 {
 			root = roots[len(roots)-1]
 		}
-		state, err := New(root, sdb, snaps)
+		sdb, err := New(root, sdb, snaps)
 		if err != nil {
 			panic(err)
 		}
+		state := sdb.State.(*stateDb)
 		state.onCommit = onCommit
 
 		for i, action := range actions {

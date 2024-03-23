@@ -60,7 +60,7 @@ func (s Storage) Copy() Storage {
 // - Account values as well as storages can be accessed and modified through the object.
 // - Finally, call commit to return the changes of storage trie and update account data.
 type stateObject struct {
-	db       *StateDB
+	db       *stateDb
 	address  common.Address      // address of ethereum account
 	addrHash common.Hash         // hash of ethereum address of the account
 	origin   *types.StateAccount // Account original data without any change applied, nil means it was not existent
@@ -96,7 +96,7 @@ func (s *stateObject) empty() bool {
 }
 
 // newObject creates a state object.
-func newObject(db *StateDB, address common.Address, acct *types.StateAccount) *stateObject {
+func newObject(db *stateDb, address common.Address, acct *types.StateAccount) *stateObject {
 	var (
 		origin  = acct
 		created = acct == nil // true if the account was not existent
@@ -432,7 +432,7 @@ func (s *stateObject) setBalance(amount *uint256.Int) {
 	s.data.Balance = amount
 }
 
-func (s *stateObject) deepCopy(db *StateDB) *stateObject {
+func (s *stateObject) deepCopy(db *stateDb) *stateObject {
 	obj := &stateObject{
 		db:       db,
 		address:  s.address,

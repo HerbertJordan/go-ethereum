@@ -31,7 +31,7 @@ import (
 // including all of the contract code and contract state tries. Preimage is
 // required in order to resolve the contract address.
 type nodeIterator struct {
-	state *StateDB // State being iterated
+	state *stateDb // State being iterated
 
 	stateIt trie.NodeIterator // Primary iterator for the global state trie
 	dataIt  trie.NodeIterator // Secondary iterator for the data trie of a contract
@@ -47,7 +47,7 @@ type nodeIterator struct {
 }
 
 // newNodeIterator creates an post-order state node iterator.
-func newNodeIterator(state *StateDB) *nodeIterator {
+func newNodeIterator(state *stateDb) *nodeIterator {
 	return &nodeIterator{
 		state: state,
 	}
